@@ -64,7 +64,7 @@ pip install gensim pandas numpy tensorflow sklearn transformers torch torchvisio
 
 ## Features
 
-- Text preprocessing and tokenization
+- Text preprocessing 
 - Word2Vec and FastText model training and optimization
 - Next word prediction
 - Model evaluation

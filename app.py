@@ -3,6 +3,14 @@ import streamlit as st
 from gensim.models import FastText
 import re
 import pickle
+from huggingface_hub import hf_hub_download
+
+model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model.pkl")
+with open(model_path, 'rb') as f:
+    model = pickle.load(f)
+
+print(model.feature_names_in_)
+
 
 # Define functions for text preprocessing and prediction
 def preprocess_text(text):

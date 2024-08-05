@@ -87,25 +87,10 @@ The project trains both Word2Vec and FastText models on the Twi language dataset
 ## Evaluation
 
 The models are evaluated using custom functions that measure the accuracy of next word predictions on validation and test datasets.
-
-## Streamlit Application
-
-The project includes a Streamlit web application that allows users to generate Twi stories interactively. Users can input a starting prompt and specify the number of words to generate.
-
-To run the Streamlit app:
-
-```
-streamlit run app.py
-```
-
-Replace `app.py` with the name of your Streamlit script.
-
 ---
 
-This README provides an overview of the project, its features, and instructions for usage. You may want to expand on certain sections or add more details specific to your implementation.
 
 For The Deployment
-Here's a README based on the provided code:
 
 # FastText Text Generation and Prediction
 
@@ -131,14 +116,6 @@ This Streamlit application demonstrates text generation and next word prediction
 3. Ensure you have the `fasttext_model.pkl` file in the same directory as the script.
 
 ## Usage
-
-Run the Streamlit app:
-
-```
-streamlit run app.py
-```
-
-Replace `app.py` with the name of your script file.
 
 ## Application Structure
 

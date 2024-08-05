@@ -5,7 +5,7 @@ from huggingface_hub import hf_hub_download
 
 # Attempt to download and load the model from Hugging Face
 try:
-    model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model")
+    model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model.pkl")
 
     # Load the model
     model = AutoModelForCausalLM.from_pretrained(model_path)

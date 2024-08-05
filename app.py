@@ -2,11 +2,13 @@ import streamlit as st
 import re
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from huggingface_hub import hf_hub_download
+import pickle
 
 # Attempt to download and load the model from Hugging Face
 try:
-    model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model.pkl")
-
+    # model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model.pkl")
+    model_path = pickle.load(open('fasttext_model.pkl', 'rb'))
+    
     # Load the model
     model = AutoModelForCausalLM.from_pretrained(model_path)
     # If tokenizer is not needed, omit it

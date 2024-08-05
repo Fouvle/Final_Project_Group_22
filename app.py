@@ -1,16 +1,16 @@
 # app.py
 import streamlit as st
-from gensim.models import FastText
 import re
-import pickle
+from transformers import AutoModel, AutoTokenizer
 from huggingface_hub import hf_hub_download
 
-model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model.pkl")
-with open(model_path, 'rb') as f:
-    model = pickle.load(f)
+# Download and load the FastText model from Hugging Face
+model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model")
+tokenizer_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_tokenizer")
 
-# print(model.feature_names_in_)
-
+# Load the model and tokenizer
+model = AutoModel.from_pretrained(model_path)
+tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
 # Define functions for text preprocessing and prediction
 def preprocess_text(text):
@@ -19,34 +19,26 @@ def preprocess_text(text):
     text = re.sub(r'[^\w\s]', '', text)
     return text.strip().lower()
 
-def predict_next_word(model, context, top_n=7):
+def predict_next_word(model, tokenizer, context, top_n=7):
     # Preprocess the context
     context = preprocess_text(context)
-    words = context.split()
+    inputs = tokenizer(context, return_tensors='pt')
+    outputs = model(**inputs)
+    predictions = outputs.logits[0, -1].detach().numpy()
 
-    if not words:
-        return []
-
-    last_word = words[-1]
-
-    if last_word not in model.wv:
-        return []
-
-    # Find the top_n most similar words
-    similar_words = model.wv.most_similar(last_word, topn=top_n)
-
-    # Extract the words from the similar words list
-    next_words = [word for word, similarity in similar_words]
+    # Get top_n predictions
+    top_indices = predictions.argsort()[-top_n:][::-1]
+    next_words = [tokenizer.decode(idx) for idx in top_indices]
 
     return next_words
 
-def generate_story(model, start_prompt, max_words=100):
+def generate_story(model, tokenizer, start_prompt, max_words=100):
     story = start_prompt.split()
     recent_words = []
 
     for _ in range(max_words):
         context = ' '.join(story[-3:])  # Use the last 3 words as context
-        next_word_predictions = predict_next_word(model, context, top_n=10)
+        next_word_predictions = predict_next_word(model, tokenizer, context, top_n=10)
 
         if not next_word_predictions:
             break
@@ -69,10 +61,6 @@ def generate_story(model, start_prompt, max_words=100):
 
     return ' '.join(story)
 
-# Load the FastText model
-with open('fasttext_model.pkl', 'rb') as file:
-    optimized_model = pickle.load(file)
-
 # Streamlit app
 st.title('FastText Text Generation and Prediction')
 
@@ -81,7 +69,7 @@ st.subheader('Generate a Story')
 start_prompt = st.text_input('Start Prompt', 'sɛ')
 max_words = st.slider('Maximum Words', min_value=1, max_value=100, value=50)
 if st.button('Generate Story'):
-    generated_story = generate_story(optimized_model, start_prompt, max_words)
+    generated_story = generate_story(model, tokenizer, start_prompt, max_words)
     st.write("Generated Story:")
     st.write(generated_story)
 
@@ -90,6 +78,6 @@ st.subheader('Predict Next Words')
 context = st.text_input('Context', 'me pɛ')
 top_n = st.slider('Top N Predictions', min_value=1, max_value=10, value=5)
 if st.button('Predict Next Words'):
-    next_words = predict_next_word(optimized_model, context, top_n)
+    next_words = predict_next_word(model, tokenizer, context, top_n)
     st.write("Next Word Predictions:")
     st.write(next_words)

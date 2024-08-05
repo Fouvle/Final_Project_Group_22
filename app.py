@@ -1,15 +1,15 @@
 import streamlit as st
 import re
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from huggingface_hub import hf_hub_download
 
-# Download and load the model and tokenizer from Hugging Face
+# Attempt to download and load the model from Hugging Face
 try:
     model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model")
-   
 
-    # Load the model and tokenizer
-    model = AutoModel.from_pretrained(model_path)
+    # Load the model
+    model = AutoModelForCausalLM.from_pretrained(model_path)
+    # If tokenizer is not needed, omit it
 except Exception as e:
     st.error(f"An error occurred: {e}")
     st.stop()
@@ -21,7 +21,7 @@ def preprocess_text(text):
     text = re.sub(r'[^\w\s]', '', text)
     return text.strip().lower()
 
-def predict_next_word(model, tokenizer, context, top_n=7):
+def predict_next_word(model, context, top_n=7):
     # Preprocess the context
     context = preprocess_text(context)
     inputs = tokenizer(context, return_tensors='pt')
@@ -34,13 +34,13 @@ def predict_next_word(model, tokenizer, context, top_n=7):
 
     return next_words
 
-def generate_story(model, tokenizer, start_prompt, max_words=100):
+def generate_story(model, start_prompt, max_words=100):
     story = start_prompt.split()
     recent_words = []
 
     for _ in range(max_words):
         context = ' '.join(story[-3:])  # Use the last 3 words as context
-        next_word_predictions = predict_next_word(model, tokenizer, context, top_n=10)
+        next_word_predictions = predict_next_word(model, context, top_n=10)
 
         if not next_word_predictions:
             break
@@ -71,7 +71,7 @@ st.subheader('Generate a Story')
 start_prompt = st.text_input('Start Prompt', 'sɛ')
 max_words = st.slider('Maximum Words', min_value=1, max_value=100, value=50)
 if st.button('Generate Story'):
-    generated_story = generate_story(model, tokenizer, start_prompt, max_words)
+    generated_story = generate_story(model, start_prompt, max_words)
     st.write("Generated Story:")
     st.write(generated_story)
 
@@ -80,6 +80,6 @@ st.subheader('Predict Next Words')
 context = st.text_input('Context', 'me pɛ')
 top_n = st.slider('Top N Predictions', min_value=1, max_value=10, value=5)
 if st.button('Predict Next Words'):
-    next_words = predict_next_word(model, tokenizer, context, top_n)
+    next_words = predict_next_word(model, context, top_n)
     st.write("Next Word Predictions:")
     st.write(next_words)

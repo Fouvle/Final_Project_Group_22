@@ -1,17 +1,11 @@
 import streamlit as st
 import re
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from huggingface_hub import hf_hub_download
 import pickle
+import numpy as np
 
 # Attempt to download and load the model from Hugging Face
 try:
-    # model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model.pkl")
-    model_path = pickle.load(open('fasttext_model.pkl', 'rb'))
-    
-    # Load the model
-    model = AutoModelForCausalLM.from_pretrained(model_path)
-    # If tokenizer is not needed, omit it
+    model = pickle.load(open('fasttext_model.pkl', 'rb'))
 except Exception as e:
     st.error(f"An error occurred: {e}")
     st.stop()
@@ -26,13 +20,22 @@ def preprocess_text(text):
 def predict_next_word(model, context, top_n=7):
     # Preprocess the context
     context = preprocess_text(context)
-    inputs = tokenizer(context, return_tensors='pt')
-    outputs = model(**inputs)
-    predictions = outputs.logits[0, -1].detach().numpy()
+    words = context.split()
 
-    # Get top_n predictions
-    top_indices = predictions.argsort()[-top_n:][::-1]
-    next_words = [tokenizer.decode(idx) for idx in top_indices]
+    # Use the last word(s) as the context
+    if not words:
+        return []
+
+    last_word = words[-1]
+
+    if last_word not in model.wv:
+        return []
+
+    # Find the top_n most similar words
+    similar_words = model.wv.most_similar(last_word, topn=top_n)
+
+    # Extract the words from the similar words list
+    next_words = [word for word, similarity in similar_words]
 
     return next_words
 

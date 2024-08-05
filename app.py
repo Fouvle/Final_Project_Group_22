@@ -9,7 +9,7 @@ model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_m
 with open(model_path, 'rb') as f:
     model = pickle.load(f)
 
-print(model.feature_names_in_)
+# print(model.feature_names_in_)
 
 
 # Define functions for text preprocessing and prediction

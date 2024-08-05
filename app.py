@@ -1,16 +1,18 @@
-# app.py
 import streamlit as st
 import re
 from transformers import AutoModel, AutoTokenizer
 from huggingface_hub import hf_hub_download
 
-# Download and load the FastText model from Hugging Face
-model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model")
-tokenizer_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_tokenizer")
+# Download and load the model and tokenizer from Hugging Face
+try:
+    model_path = hf_hub_download(repo_id="Yaaba/Final_Project", filename="fasttext_model")
+   
 
-# Load the model and tokenizer
-model = AutoModel.from_pretrained(model_path)
-tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+    # Load the model and tokenizer
+    model = AutoModel.from_pretrained(model_path)
+except Exception as e:
+    st.error(f"An error occurred: {e}")
+    st.stop()
 
 # Define functions for text preprocessing and prediction
 def preprocess_text(text):
